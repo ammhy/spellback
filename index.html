@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Daily Vocab</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <svg class="icon-sprite" aria-hidden="true">
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4z"/></symbol>
+    <symbol id="i-library" viewBox="0 0 24 24"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/><path d="M2 20h20"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-data" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 15H6L5 6M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V3m0 0 4 4m-4-4L8 7M5 21h14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  </svg>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark"><svg><use href="#i-book"></use></svg></span>
+        <span><strong>Daily Vocab</strong><small>本地单词复习</small></span>
+      </div>
+
+      <nav class="nav" aria-label="主导航">
+        <button class="nav-item is-active" data-view="dashboard"><svg><use href="#i-home"></use></svg><span>今日</span></button>
+        <button class="nav-item" data-view="review"><svg><use href="#i-play"></use></svg><span>复习</span><b id="nav-due-count">0</b></button>
+        <button class="nav-item" data-view="library"><svg><use href="#i-library"></use></svg><span>词库</span></button>
+        <button class="nav-item" data-view="editor"><svg><use href="#i-plus"></use></svg><span>添加</span></button>
+        <button class="nav-item" data-view="data"><svg><use href="#i-data"></use></svg><span>设置</span></button>
+      </nav>
+
+      <div class="sidebar-status">
+        <span>今日待复习</span>
+        <strong id="side-due-count">0</strong>
+        <small id="side-total-count">共 0 个单词</small>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="view is-active" id="view-dashboard">
+        <header class="page-header">
+          <div><p class="eyebrow" id="today-label"></p><h1>今日复习</h1></div>
+          <button class="button button-primary" id="start-review-btn"><svg><use href="#i-play"></use></svg>开始复习</button>
+        </header>
+
+        <div class="stats-grid">
+          <article class="stat"><span>今日到期</span><strong id="stat-due">0</strong><small>需要完成</small></article>
+          <article class="stat"><span>单词总数</span><strong id="stat-total">0</strong><small>本地词库</small></article>
+          <article class="stat"><span>五级单词</span><strong id="stat-mastered">0</strong><small>长期记忆</small></article>
+          <article class="stat"><span>今日已复习</span><strong id="stat-reviewed">0</strong><small>完成记录</small></article>
+        </div>
+
+        <div class="dashboard-grid">
+          <section class="focus-panel" id="focus-panel">
+            <div class="panel-heading"><div><span class="section-label">NEXT UP</span><h2>待复习单词</h2></div><button class="text-button" data-view-target="library">查看词库<svg><use href="#i-arrow"></use></svg></button></div>
+            <div id="due-preview" class="due-preview"></div>
+          </section>
+
+          <section class="schedule-panel">
+            <div class="panel-heading"><div><span class="section-label">SCHEDULE</span><h2>熟练度间隔</h2></div></div>
+            <div class="level-schedule">
+              <div><b class="level-dot level-1">1</b><span id="schedule-level-1">每 1 天</span></div>
+              <div><b class="level-dot level-2">2</b><span id="schedule-level-2">每 2 天</span></div>
+              <div><b class="level-dot level-3">3</b><span id="schedule-level-3">每 4 天</span></div>
+              <div><b class="level-dot level-4">4</b><span id="schedule-level-4">每 7 天</span></div>
+              <div><b class="level-dot level-5">5</b><span id="schedule-level-5">每 15 天</span></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-review">
+        <header class="page-header compact">
+          <div><p class="eyebrow">CHINESE TO ENGLISH</p><h1>拼写复习</h1></div>
+          <div class="progress-copy"><strong id="review-progress-text">0 / 0</strong><span>今日进度</span></div>
+        </header>
+        <div class="progress-track"><span id="review-progress-bar"></span></div>
+        <div id="review-stage" class="review-stage"></div>
+      </section>
+
+      <section class="view" id="view-library">
+        <header class="page-header">
+          <div><p class="eyebrow">VOCABULARY</p><h1>我的词库</h1></div>
+          <button class="button button-primary" data-view-target="editor"><svg><use href="#i-plus"></use></svg>添加单词</button>
+        </header>
+        <div class="library-toolbar">
+          <label class="search-box"><svg><use href="#i-search"></use></svg><input id="search-input" type="search" placeholder="搜索英文或中文"></label>
+          <label class="select-box"><span>熟练度</span><select id="level-filter"><option value="all">全部</option><option value="1">1 级</option><option value="2">2 级</option><option value="3">3 级</option><option value="4">4 级</option><option value="5">5 级</option></select></label>
+          <label class="select-box"><span>标签</span><select id="tag-filter"><option value="all">全部</option></select></label>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>英文</th><th>中文</th><th>标签</th><th>熟练度</th><th>下次复习</th><th>正确率</th><th class="actions-col">操作</th></tr></thead>
+            <tbody id="word-table-body"></tbody>
+          </table>
+          <div class="empty-state is-hidden" id="library-empty"><svg><use href="#i-library"></use></svg><h2>词库还是空的</h2><button class="button button-primary" data-view-target="editor">添加第一个单词</button></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-editor">
+        <header class="page-header"><div><p class="eyebrow">WORD DETAILS</p><h1 id="editor-title">添加单词</h1></div></header>
+        <form id="word-form" class="word-form">
+          <input type="hidden" id="word-id">
+          <label class="field"><span>英文</span><input id="english-input" type="text" autocomplete="off" spellcheck="false" placeholder="例如 resilient" required></label>
+          <label class="field"><span>中文</span><input id="chinese-input" type="text" autocomplete="off" placeholder="例如 有韧性的" required></label>
+          <label class="field"><span>可接受拼写</span><input id="aliases-input" type="text" autocomplete="off" spellcheck="false" placeholder="多个答案用逗号分隔，例如 colour，colors"></label>
+          <label class="field"><span>标签</span><input id="tags-input" type="text" autocomplete="off" placeholder="例如 阅读，工作，雅思"></label>
+          <fieldset class="level-field">
+            <legend>当前熟练度</legend>
+            <div class="level-options" id="editor-level-options">
+              <label><input type="radio" name="editor-level" value="1" checked><span><b>1</b>陌生</span></label>
+              <label><input type="radio" name="editor-level" value="2"><span><b>2</b>眼熟</span></label>
+              <label><input type="radio" name="editor-level" value="3"><span><b>3</b>一般</span></label>
+              <label><input type="radio" name="editor-level" value="4"><span><b>4</b>熟悉</span></label>
+              <label><input type="radio" name="editor-level" value="5"><span><b>5</b>掌握</span></label>
+            </div>
+          </fieldset>
+          <div class="form-actions"><button type="button" class="button button-secondary" id="cancel-edit-btn">取消</button><button type="submit" class="button button-primary"><svg><use href="#i-check"></use></svg>保存单词</button></div>
+        </form>
+      </section>
+
+      <section class="view" id="view-data">
+        <header class="page-header"><div><p class="eyebrow">PERSONAL RULES</p><h1>个性化与数据</h1></div></header>
+        <form class="preferences-form" id="preferences-form">
+          <div class="settings-heading"><div><span class="section-label">REVIEW SETTINGS</span><h2>复习规则</h2></div><button class="button button-primary" type="submit"><svg><use href="#i-check"></use></svg>保存设置</button></div>
+          <div class="settings-grid">
+            <label class="setting-field"><span>每日复习上限</span><input id="daily-limit-input" type="number" min="1" max="500" value="30"><small>超过上限的词保留到下一轮</small></label>
+            <label class="setting-field"><span>拼写判定</span><select id="answer-mode-select"><option value="strict">严格：忽略大小写</option><option value="forgiving">宽松：再忽略空格和标点</option></select><small>可接受拼写仍可为单词单独设置</small></label>
+          </div>
+          <fieldset class="interval-settings">
+            <legend>五级复习间隔（天）</legend>
+            <div>
+              <label><b class="level-dot level-1">1</b><input id="interval-1-input" type="number" min="1" max="3650" value="1"></label>
+              <label><b class="level-dot level-2">2</b><input id="interval-2-input" type="number" min="1" max="3650" value="2"></label>
+              <label><b class="level-dot level-3">3</b><input id="interval-3-input" type="number" min="1" max="3650" value="4"></label>
+              <label><b class="level-dot level-4">4</b><input id="interval-4-input" type="number" min="1" max="3650" value="7"></label>
+              <label><b class="level-dot level-5">5</b><input id="interval-5-input" type="number" min="1" max="3650" value="15"></label>
+            </div>
+          </fieldset>
+          <div class="toggle-settings">
+            <label><input id="retry-wrong-input" type="checkbox" checked><span><strong>错词次日重现</strong><small>拼错后无论选择几级，明天再出现一次</small></span></label>
+            <label><input id="mistake-first-input" type="checkbox" checked><span><strong>易错词优先</strong><small>同一天到期时，优先复习错误次数更多的词</small></span></label>
+          </div>
+        </form>
+        <div class="data-actions">
+          <article><svg><use href="#i-download"></use></svg><div><h2>导出备份</h2><p>保存单词、熟练度和复习日期。</p></div><button class="button button-secondary" id="export-btn">导出 JSON</button></article>
+          <article><svg><use href="#i-upload"></use></svg><div><h2>导入备份</h2><p>导入会合并同名英文单词。</p></div><label class="button button-secondary file-button">选择文件<input id="import-input" type="file" accept="application/json,.json"></label></article>
+          <article class="danger-row"><svg><use href="#i-trash"></use></svg><div><h2>清空词库</h2><p>该操作无法撤销，请先导出备份。</p></div><button class="button button-danger" id="reset-btn">清空全部</button></article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
